@@ -1,0 +1,105 @@
+swagger: '2.0'
+info:
+  description: RESTful public-facing management API.
+               The API is accessible through HTTP calls on specific URLs
+               carrying JSON modeled data.
+  version: v1
+  title: Nydus-rs API
+  # put the contact info for your development or API team
+  contact:
+    email: bergwolf@hyper.sh
+
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+
+host: localhost
+basePath: /v1
+
+schemes:
+ - http
+consumes:
+  - application/json
+produces:
+  - application/json
+
+paths:
+  /:
+    get:
+      summary: Returns general information about a nydus-rs daemon
+      operationId: describeDaemon
+      responses:
+        200:
+          description: Daemon information
+          schema:
+            $ref: '#/definitions/DaemonInfo'
+        default:
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/Error'
+  /mount:
+    put:
+      summary: Creates a mount.
+      operationId: createMount
+      parameters:
+      - name: info
+        in: body
+        required: true
+        schema:
+          $ref: "#/definitions/MountInfo"
+      responses:
+        204:
+          description: The mount was successful
+        400:
+          description: The mount action cannot be executed due to bad input
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  DaemonInfo:
+    type: object
+    required:
+    - id
+    - state
+    - version
+    properties:
+      id:
+        type: string
+      state:
+        type: string
+        enum:
+          - Starting
+          - Running
+          - Stopping
+      version:
+        type: string
+  MountInfo:
+    type: object
+    required:
+    - fstype
+    - source
+    - mountpoint
+    properties:
+      fstype:
+        type: string
+        description: mount type
+        example: rafs
+      source:
+        type: string
+        description: mount source
+        example: /foo/bar/bootstrap
+      mountpoint:
+        type: string
+        description: mount target
+        example: /foo/bar
+  Error:
+    type: object
+    properties:
+      fault_message:
+        type: string
+        description: A description of the error condition
+        readOnly: true
+
